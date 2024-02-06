@@ -4,6 +4,7 @@ import React, { useState, ChangeEvent } from 'react';
 const Home: React.FC = () => {
   const [inputText, setInputText] = useState<string>('');
   const [apiResponse, setApiResponse] = useState<{ [key: string]: number }>({});
+  const [filter, setFilter] = useState<string>('latest');
 
   const handleInputChange = (e: ChangeEvent<HTMLTextAreaElement>) => {
     setInputText(e.target.value);
@@ -25,6 +26,26 @@ const Home: React.FC = () => {
     }
   };
 
+  const handleClear = () => {
+    setInputText('');
+    setApiResponse({});
+  };
+
+  const handleFilterChange = (e: ChangeEvent<HTMLSelectElement>) => {
+    setFilter(e.target.value);
+  };
+
+  const sortedResponse = () => {
+    if (filter === 'alphabetical') {
+      return Object.entries(apiResponse).sort(([a], [b]) => a.localeCompare(b));
+    } else if (filter === 'largest') {
+      return Object.entries(apiResponse).sort(([, a], [, b]) => b - a);
+    } else if (filter === 'smallest') {
+      return Object.entries(apiResponse).sort(([, a], [, b]) => a - b);
+    }
+    return Object.entries(apiResponse);
+  };
+
   return (
     <div className="container mx-auto my-8 dark:text-white sm:mx-28">
       <h1 className="text-4xl font-bold mb-6">Nenhuma dessas palavras está na bíblia</h1>
@@ -40,10 +61,25 @@ const Home: React.FC = () => {
       >
         Buscar
       </button>
+      <button
+        className="mt-4 ml-2 bg-gray-500 text-white py-2 px-4 rounded dark:bg-gray-700"
+        onClick={handleClear}
+      >
+        Limpar
+      </button>
+      <select
+        className="mt-4 ml-2 p-2 px-4 rounded dark:bg-gray-800"
+        value={filter}
+        onChange={handleFilterChange}
+      >
+        <option value="alphabetical">Ordenar Alfabeticamente</option>
+        <option value="largest">Maior Número</option>
+        <option value="smallest">Menor Número</option>
+      </select>
       <h2 className="text-lg font-bold my-4">Respostas:</h2>
       <div className="mt-4 overflow-y-auto max-h-72">
         <ul className={`dark:bg-gray-800 dark:border-gray-700 dark:text-white p-4 rounded-md ${apiResponse.length > 0 ? 'mt-4' : ''}`}>
-          {Object.entries(apiResponse).map(([word, count], index) => (
+          {sortedResponse().map(([word, count], index) => (
             <li key={index} className="mb-2 bg-gray-200 dark:bg-gray-700 rounded-md p-2">
               <span className="font-bold">{word}:</span> {count}
             </li>
